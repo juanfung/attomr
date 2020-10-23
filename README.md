@@ -8,10 +8,10 @@ The goal of attomr is to ...
 
 ## Installation
 
-You can install the released version of attomr from [CRAN](https://CRAN.R-project.org) with:
+In development. You can install the current version of attomr from GitHub with:
 
 ``` r
-install.packages("attomr")
+devtools::install_github("juanfung/attomr")
 ```
 
 ## Example
@@ -20,6 +20,33 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(attomr)
+
 ## basic example code
+## NB: requires setting apikey
+
+## create full endpoint path
+path = build_path('basic')
+
+## basic list of query parameters
+query = build_query('basic')
+
+## append query parameters
+query = update_query(
+    query,
+    list(address='721 Evergreen Terrace, Springfield'))
+
+## make the query
+response = attom_api(path, query, apikey)
+
+## you can more easily iterate through a list of addresses:
+testlist = list(
+    list(address='468 SEQUOIA DR, SMYRNA, DE'),
+    ## Throws an error but does not stop
+    list(address='741 EVERGREEN TERRACE, SPRINGFIELD')
+    ## list(address='4529 Winona Court, Denver, CO')
+)
+
+testout = search_list(queries=testlist, apikey=apikey, s='basic')
+
 ```
 
