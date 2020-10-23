@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of attomr is to ...
+The goal of attomr is to make calls to the ATTOM API easy from R!
 
 ## Installation
 
