@@ -1,0 +1,208 @@
+## R client for ATTOM API
+## Author: Juan F. Fung
+## Date: 2020-10-16
+
+## header
+accept = 'application/json' ## default
+
+## set user agent
+## [TODO] allow user to set user agent
+ua = httr::user_agent('https://juanfung.github.io')
+
+## define base url and endpoint (NB: endpoint may change)
+base_url = 'https://api.gateway.attomdata.com'
+endpoint = '/propertyapi/v1.0.0/'
+
+## variables for specific endpoints (endpoint + service)
+
+## /property/id
+## - return list of properties that fit criteria (bedrooms, geoid)
+endpoint_id = paste0(endpoint, 'property/id')
+
+## /property/basicprofile
+## - return basic property info, most recent sale and taxes 
+endpoint_basicprofile = paste0(endpoint, 'property/basicprofile')
+
+## /property/detail
+## - property characteristics, given address
+## - property details, given attomid
+endpoint_detail = paste0(endpoint, 'property/detail')
+
+## /property/snapshot
+## - returns properties within radius of lat/long
+## - returns properties and characteristics by city and lotsize
+## - properties wihin postalcade by UniversalSize
+endpoint_snapshot = paste0(endpoint, 'property/snapshot')
+
+## /property/address
+## - return properties that fall within radius of address
+## - return properties within postalcode
+endpoint_address = paste0(endpoint, 'property/address')
+
+## /sale/snapshot
+## - return sales within radius of property
+## - return sales within geography (geoid)
+endpoint_sales = paste0(endpoint, 'sale/snapshot')
+
+
+## functions
+
+## function for GET call to API (borrowed from httr vignette)
+## [TODO] parsing in post-processing step?
+attom_api = function(path, query, apikey) {
+    ## Client to GET and parse response from API
+    url = httr::modify_url(base_url, path=path)
+    resp = httr::GET(url=url,
+                     ua,
+                     httr::add_headers(
+                               Accept=accept,
+                               apikey=apikey),
+                     query=query
+                     ## [TODO] use httr::with_verbose
+                     ## verbose()
+                     )
+    ## Check expected response format
+    if (httr::http_type(resp) != "application/json") {
+        warning("API did not return json", call. = FALSE)
+    }
+    parsed = jsonlite::fromJSON(httr::content(resp, 'text'))
+    ## Print error message
+    if (httr::http_error(resp)) {
+        warning(
+            sprintf(
+                'API request failed [%s]\n%s',
+                httr::status_code(resp),
+                parsed$status$msg),
+            call. = FALSE
+        )
+    }
+    structure(
+        list(
+            parsed=parsed,
+            path=path,
+            resp=resp),
+        class='attom_api'
+    )
+}
+
+## function to print response (borrowed from httr vignette)
+print.attom_api = function(x, ...) {
+    ## [TODO]
+    cat("<ATTOM ", x$path, ">\n", sep = "")
+    str(x$parsed)
+    invisible(x)
+}
+
+## function to create endpoint path
+build_path = function(s) {
+    ## Arguments ##
+    ## s: one of basic, detail, address, sales
+    ## Returns ##
+    ## path: full endpoint path for query (endpoint + service)
+    if (s == 'basic') {
+        path = endpoint_basicprofile
+    } else if (s == 'detail') {
+        path = endpoint_detail
+    } else if (s == 'address') {
+        path = endpoint_address
+    } else if (s == 'sales') {
+        path = endpoint_sales
+    } else {
+        warning('Invalid search option.', call.=FALSE)
+        path = endpoint
+    }
+    return(path)
+}
+
+## function to build base query
+build_query = function(s, ...) {
+    ## Arguments ##
+    ## s: one of basic, detail, address, sales
+    ## ...: named query parameters
+    ## Returns ##
+    ## query: list with query parameters common across queries
+    args = list(...)
+    ## if (length(args) == 0) {
+    ##     warning('No arguments to build query.', call.=FALSE)
+    ## }
+    query = list()
+    if (s %in% c('basic', 'detail')) {
+        ## Return empty list
+    } else if (s %in% c('address', 'sales')) {
+        query[['radius']] = ifelse('radius' %in% names(args), args$radius, 20)
+        query[['propertytype']] = ifelse('propertytype' %in% names(args), args$propertytype, 'SFR')
+        query[['page']] = ifelse('page' %in% names(args), args$page, 1)
+        query[['pagesize']] = ifelse('pagesize' %in% names(args), args$pagesize, 100)
+        if (s == 'sales') {
+            query[['minsaleamt']] = ifelse('min' %in% names(args), args$min, 100000)
+            query[['maxsaleamt']] = ifelse('max' %in% names(args), args$max, 1000000)
+        }
+    } else {
+        warning('Missing or invalid query parameters.', call.=FALSE)
+    }
+    return(query)
+}
+
+## function to update query
+## [TODO] Generalize to search by address or by lat/long (property/snapshot)
+update_query = function(query, l) {
+    ## Arguments ##
+    ## query: base query
+    ## l: list of parameters to add to query
+    ## Returns ##
+    ## query: query with updated parameters
+    if (length(l) == 1) {
+        address = l[['address']]
+        if (is.null(address)) {
+            warning('No address parameter provided for query', call.=FALSE)
+        }
+        query[['address']] = address
+    } else if (length(l) == 2) {
+        address1 = l[['address1']]
+        address2 = l[['address2']]
+        if (is.null(address1) | is.null(address2)) {
+            warning('Incomplete address parameters provided for query', call.=FALSE)
+        }
+        query[['address1']] = address1
+        query[['address2']] = address2
+    } else {
+        warning('Invalid or missing query parameters', call.=FALSE)
+    }
+    return(query)
+}
+
+## function to iterate through list of queries (list of addresses)
+## [TODO] parameterize user agent?
+## [TODO] enforce checking daily/monthly limits
+## - 5000 *parcels*/day
+## - 15000 *requests*/month
+search_list = function(queries, apikey, s, ...) {
+    ## Arguments ##
+    ## queries: list of query parameters to iterate over
+    ## apikey: API key
+    ## Returns ##
+    ## responses: list of responses for each query in queries
+    path = build_path(s)
+    responses = list()
+    query = build_query(s, ...)
+    for (i in 1:length(queries)) {
+        query = update_query(query, queries[[i]])
+        responses[[i]] = attom_api(path, query, apikey)
+        Sys.sleep(5)
+    }
+    return(responses)
+}
+
+## function to post-process list of responses (add query ID)
+parse_list = function(resps) {
+    ## iterate through list of resps
+    parsed_list = list()
+    for (i in 1:length(resps)) {
+        ## append (table of) responses to list
+        if (!httr::http_error(resps[[i]][['resp']])) {
+            ## skip responses with errors, since nothing to append
+            parsed_list[[i]] = tibble::as_tibble(resps[[i]][['parsed']][['property']])
+        }
+    }
+    return(parsed_list)
+}
