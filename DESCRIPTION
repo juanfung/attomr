@@ -17,3 +17,5 @@ Imports:
     httr (>= 1.4.2),
     jsonlite (>= 1.7.1),
     tibble (>= 3.0.4)
+Suggests: 
+    testthat
