@@ -4,7 +4,9 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of attomr is to make calls to the ATTOM API easy from R!
+The goal of attomr is to make calls to the ATTOM API easy from R! Relies on
+[`httr`](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html)
+on the back end.
 
 ## Installation
 
