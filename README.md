@@ -22,7 +22,11 @@ This is a basic example which shows you how to solve a common problem:
 library(attomr)
 
 ## basic example code
-## NB: requires setting apikey
+## NB: requires setting apikey variable
+apikey = 'YOUR_API_KEY'
+
+## set user agent globally
+set_ua('github.com/juanfung/attomr')
 
 ## create full endpoint path
 path = build_path('basic')
@@ -47,6 +51,9 @@ testlist = list(
 )
 
 testout = search_list(queries=testlist, apikey=apikey, s='basic')
+
+## parse responses to (list of) tables
+testdf = parse_list(testout)
 
 ```
 
