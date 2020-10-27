@@ -25,7 +25,7 @@ library(attomr)
 ## NB: requires setting apikey variable
 apikey = 'YOUR_API_KEY'
 
-## set user agent globally
+## (optional) set user agent globally
 set_ua('github.com/juanfung/attomr')
 
 ## create full endpoint path
