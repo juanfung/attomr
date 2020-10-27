@@ -3,11 +3,12 @@
 ## Date: 2020-10-16
 
 ## header
+## [TODO] allow user to set Accept header;
+## - no immediate need for xml, so no function needed
 accept = 'application/json' ## default
 
-## set user agent
-## [TODO] allow user to set user agent
-ua = httr::user_agent('https://juanfung.github.io')
+## set API Key
+## [TODO] allow user to (optionally) set at beginning of session
 
 ## define base url and endpoint (NB: endpoint may change)
 base_url = 'https://api.gateway.attomdata.com'
@@ -47,6 +48,18 @@ endpoint_sales = paste0(endpoint, 'sale/snapshot')
 
 ## functions
 
+#' function to optionally set user agent globally
+#'
+#' @param a A string to pass to httr::user_agent
+#'
+#' @export
+set_ua = function(a){
+    assign(x='ua',
+           value=httr::user_agent(a),
+           envir=.GlobalEnv)
+    message(sprintf('User agent set to %s.', a))
+}
+
 #' GET call to API
 #'
 #' This function takes an API endpoint path, query parameters, and the
@@ -63,16 +76,21 @@ attom_api = function(path, query, apikey) {
     ## Client to GET and parse response from API
     url = httr::modify_url(base_url, path=path)
     resp = httr::GET(url=url,
-                     ua,
+                     ## user agent
+                     ifelse(exists('ua'),
+                            ua,
+                            httr::user_agent('https://github.com/juanfung/attomr')),
+                     ## header parameters
                      httr::add_headers(
                                Accept=accept,
                                apikey=apikey),
+                     ## query parameters
                      query=query
                      ## [TODO] use httr::with_verbose
                      ## verbose()
                      )
     ## Check expected response format
-    if (httr::http_type(resp) != "application/json") {
+    if (httr::http_type(resp) != accept) {
         warning("API did not return json", call. = FALSE)
     }
     parsed = jsonlite::fromJSON(httr::content(resp, 'text'))
@@ -94,7 +112,6 @@ attom_api = function(path, query, apikey) {
         class='attom_api'
     )
 }
-
 
 #' Print GET response
 #'
