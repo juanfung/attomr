@@ -4,12 +4,12 @@
 \alias{update_query}
 \title{Function to update query}
 \usage{
-update_query(query, l)
+update_query(query, update)
 }
 \arguments{
 \item{query}{A list of named query parameters}
 
-\item{l}{A list of named parameters to append to query}
+\item{update}{A list of named parameters to append to query}
 }
 \value{
 query An updated list of named query parameters

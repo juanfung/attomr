@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{An object of class \code{attom_api}}
+
+\item{...}{Other named parameters passed to print method}
 }
 \description{
 Adds print method to object of class \code{attom_api} (borrowed from

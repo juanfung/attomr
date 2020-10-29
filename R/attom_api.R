@@ -119,10 +119,13 @@ attom_api = function(path, query, apikey) {
 #' httr vignette)
 #'
 #' @param x An object of class `attom_api`
+#' @param ... Other named parameters passed to print method
+#'
+#' @importFrom utils str
 #'
 #' @export
 print.attom_api = function(x, ...) {
-    ## [TODO]
+    ## [TODO] add more functionality
     cat("<ATTOM ", x$path, ">\n", sep = "")
     str(x$parsed)
     invisible(x)
@@ -198,30 +201,24 @@ build_query = function(s, ...) {
 #' appending new parameters to the query
 #'
 #' @param query A list of named query parameters
-#' @param l A list of named parameters to append to query
+#' @param update A list of named parameters to append to query
 #'
 #' @return query An updated list of named query parameters
 #'
 #' @export
-update_query = function(query, l) {
-    ## [TODO] Generalize to search by address or by lat/long (property/snapshot)
-    if (length(l) == 1) {
-        address = l[['address']]
-        if (is.null(address)) {
-            warning('No address parameter provided for query', call.=FALSE)
-        }
-        query[['address']] = address
-    } else if (length(l) == 2) {
-        address1 = l[['address1']]
-        address2 = l[['address2']]
-        if (is.null(address1) | is.null(address2)) {
-            warning('Incomplete address parameters provided for query', call.=FALSE)
-        }
-        query[['address1']] = address1
-        query[['address2']] = address2
-    } else {
+update_query = function(query, update) {
+    updates = names(update)
+    knowns = c('address', 'address1', 'address2', 'lat', 'long')
+    if (length(setdiff(knowns, updates)) == length(knowns)) {
         warning('Invalid or missing query parameters', call.=FALSE)
+    } else {
+        for (k in knowns) {
+            if (k %in% updates) {
+                query[[k]] = update[[k]]
+            }
+        }
     }
+    ## TODO: check that {address, address1, address2} are not passed together
     return(query)
 }
 
@@ -280,4 +277,19 @@ parse_list = function(resps) {
         }
     }
     return(parsed_list)
+}
+
+#' Function to create list of lists of addresses from data frame
+#'
+#' @param d A data frame such that each row is an address
+#'
+#' @return queries A list of lists of queries
+#'
+#' @export
+create_queries = function(d) {
+    ## convert each row list and collect all into a single list
+    ## [NB] Is it easier to pass data frame of addresses to search_list?
+    ## eg: if (class(queries) != "list") {queries = create_queries(queries)}
+    queries = lapply(seq(nrow(d)), function(i) as.list(d[i, ]))
+    return(queries)
 }
