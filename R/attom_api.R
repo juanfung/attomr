@@ -2,6 +2,9 @@
 ## Author: Juan F. Fung
 ## Date: 2020-10-16
 
+## create new environment for local variables
+attomr.env = new.env()
+
 ## header
 ## [TODO] allow user to set Accept header;
 ## - no immediate need for xml, so no function needed
@@ -56,7 +59,7 @@ endpoint_sales = paste0(endpoint, 'sale/snapshot')
 set_ua = function(a){
     assign(x='ua',
            value=httr::user_agent(a),
-           envir=.GlobalEnv)
+           envir=attomr.env)
     message(sprintf('User agent set to %s.', a))
 }
 
@@ -77,8 +80,8 @@ attom_api = function(path, query, apikey) {
     url = httr::modify_url(base_url, path=path)
     resp = httr::GET(url=url,
                      ## user agent
-                     ifelse(exists('ua'),
-                            ua,
+                     ifelse(exists('ua', where=attomr.env),
+                            attomr.env$ua,
                             httr::user_agent('https://github.com/juanfung/attomr')),
                      ## header parameters
                      httr::add_headers(
