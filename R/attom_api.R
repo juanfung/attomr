@@ -8,45 +8,45 @@ attomr.env = new.env()
 ## header
 ## [TODO] allow user to set Accept header;
 ## - no immediate need for xml, so no function needed
-accept = 'application/json' ## default
+assign('accept', 'application/json', envir=attomr.env) ## default
 
 ## set API Key
 ## [TODO] allow user to (optionally) set at beginning of session
 
 ## define base url and endpoint (NB: endpoint may change)
-base_url = 'https://api.gateway.attomdata.com'
-endpoint = '/propertyapi/v1.0.0/'
+assign('base_url', 'https://api.gateway.attomdata.com', envir=attomr.env)
+assign('endpoint', '/propertyapi/v1.0.0/', envir=attomr.env)
 
 ## variables for specific endpoints (endpoint + service)
+assign('endpoint_list',
+       list(
+           ## /property/id
+           ## - return list of properties that fit criteria (bedrooms, geoid)
+           'id'='property/id',
+           ## /property/basicprofile
+           ## - return basic property info, most recent sale and taxes 
+           'basic'='property/basicprofile',
+           ## /property/detail
+           ## - property characteristics, given address
+           ## - property details, given attomid
+           'detail'='property/detail',
+           ## /property/snapshot
+           ## - returns properties within radius of lat/long
+           ## - returns properties and characteristics by city and lotsize
+           ## - properties wihin postalcade by UniversalSize
+           'snapshot'='property/snapshot',
+           ## /property/address
+           ## - return properties that fall within radius of address
+           ## - return properties within postalcode
+           'address'='property/address',
+           ## /sale/snapshot
+           ## - return sales within radius of property
+           ## - return sales within geography (geoid)
+           'sales'='sale/snapshot'
+       ),
+       envir=attomr.env
+       )
 
-## /property/id
-## - return list of properties that fit criteria (bedrooms, geoid)
-endpoint_id = paste0(endpoint, 'property/id')
-
-## /property/basicprofile
-## - return basic property info, most recent sale and taxes 
-endpoint_basicprofile = paste0(endpoint, 'property/basicprofile')
-
-## /property/detail
-## - property characteristics, given address
-## - property details, given attomid
-endpoint_detail = paste0(endpoint, 'property/detail')
-
-## /property/snapshot
-## - returns properties within radius of lat/long
-## - returns properties and characteristics by city and lotsize
-## - properties wihin postalcade by UniversalSize
-endpoint_snapshot = paste0(endpoint, 'property/snapshot')
-
-## /property/address
-## - return properties that fall within radius of address
-## - return properties within postalcode
-endpoint_address = paste0(endpoint, 'property/address')
-
-## /sale/snapshot
-## - return sales within radius of property
-## - return sales within geography (geoid)
-endpoint_sales = paste0(endpoint, 'sale/snapshot')
 
 
 ## functions
@@ -77,7 +77,7 @@ set_ua = function(a){
 #' @export
 attom_api = function(path, query, apikey) {
     ## Client to GET and parse response from API
-    url = httr::modify_url(base_url, path=path)
+    url = httr::modify_url(attomr.env$base_url, path=path)
     resp = httr::GET(url=url,
                      ## user agent
                      ifelse(exists('ua', where=attomr.env),
@@ -85,7 +85,7 @@ attom_api = function(path, query, apikey) {
                             httr::user_agent('https://github.com/juanfung/attomr')),
                      ## header parameters
                      httr::add_headers(
-                               Accept=accept,
+                               Accept=attomr.env$accept,
                                apikey=apikey),
                      ## query parameters
                      query=query
@@ -93,7 +93,7 @@ attom_api = function(path, query, apikey) {
                      ## verbose()
                      )
     ## Check expected response format
-    if (httr::http_type(resp) != accept) {
+    if (httr::http_type(resp) != attomr.env$accept) {
         warning("API did not return json", call. = FALSE)
     }
     parsed = jsonlite::fromJSON(httr::content(resp, 'text'))
@@ -145,19 +145,14 @@ print.attom_api = function(x, ...) {
 #'
 #' @return path Full endpoint path (endpoint/service)
 #'
+
 #' @export
 build_path = function(s) {
-    if (s == 'basic') {
-        path = endpoint_basicprofile
-    } else if (s == 'detail') {
-        path = endpoint_detail
-    } else if (s == 'address') {
-        path = endpoint_address
-    } else if (s == 'sales') {
-        path = endpoint_sales
+    if (s %in% names(attomr.env$endpoint_list)) {
+        path = paste0(attomr.env$endpoint, attomr.env$endpoint_list[[s]])
     } else {
         warning('Invalid search option.', call.=FALSE)
-        path = endpoint
+        path = attomr.env$endpoint
     }
     return(path)
 }
@@ -211,7 +206,7 @@ build_query = function(s, ...) {
 #' @export
 update_query = function(query, update) {
     updates = names(update)
-    knowns = c('address', 'address1', 'address2', 'lat', 'long')
+    knowns = c('address', 'address1', 'address2', 'longitude', 'latitude', 'radius')
     if (length(setdiff(knowns, updates)) == length(knowns)) {
         warning('Invalid or missing query parameters', call.=FALSE)
     } else {
@@ -243,7 +238,6 @@ update_query = function(query, update) {
 #'
 #' @export
 search_list = function(queries, apikey, s, ...) {
-    ## [TODO] parameterize user agent?
     ## [TODO] enforce checking daily/monthly limits
     ## - 5000 *parcels*/day
     ## - 15000 *requests*/month
