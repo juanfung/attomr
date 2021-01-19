@@ -29,7 +29,7 @@ List of available endpoints:
 \item 'basic': (\verb{/property/basicprofile}) returns basic property info, most recent sale and taxes
 \item 'detail': (\verb{/property/detail}) property characteristics, given address; or property details, given attomid
 \item 'snapshot': (\verb{/property/snapshot}) return properties that fall within radius of lat/long
-\item 'address\verb{: (}/property/address`) return properties that dall within radius of address or postalcode
+\item 'address': (\verb{/property/address}) return properties that dall within radius of address or postalcode
 \item 'address': (\verb{/sale/snapshot}) return sales within radius of property
 }
 }

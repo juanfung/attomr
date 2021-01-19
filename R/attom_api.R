@@ -74,7 +74,7 @@ set_ua = function(a){
 #' - 'basic': (`/property/basicprofile`) returns basic property info, most recent sale and taxes
 #' - 'detail': (`/property/detail`) property characteristics, given address; or property details, given attomid
 #' - 'snapshot': (`/property/snapshot`) return properties that fall within radius of lat/long
-#' - 'address`: (`/property/address`) return properties that dall within radius of address or postalcode
+#' - 'address': (`/property/address`) return properties that dall within radius of address or postalcode
 #' - 'address': (`/sale/snapshot`) return sales within radius of property
 #' 
 #' @param path Path to endpoint (e.g., '/endpoint/property/snapshot')
