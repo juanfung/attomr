@@ -68,6 +68,15 @@ set_ua = function(a){
 #' This function takes an API endpoint path, query parameters, and the
 #' user's API key to make a GET call to the ATTOM API (borrowed from httr
 #' vignette).
+#'
+#' List of available endpoints:
+#' - 'id': (`/property/id`) returns list of properties that fit criteria (bedrooms, geoid)
+#' - 'basic': (`/property/basicprofile`) returns basic property info, most recent sale and taxes
+#' - 'detail': (`/property/detail`) property characteristics, given address; or property details, given attomid
+#' - 'snapshot': (`/property/snapshot`) return properties that fall within radius of lat/long
+#' - 'address`: (`/property/address`) return properties that dall within radius of address or postalcode
+#' - 'address': (`/sale/snapshot`) return sales within radius of property
+#' 
 #' @param path Path to endpoint (e.g., '/endpoint/property/snapshot')
 #' @param query List of named parameters to pass to query
 #' @param apikey The user's ATTOM API Key (required)

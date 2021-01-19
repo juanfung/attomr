@@ -22,3 +22,14 @@ This function takes an API endpoint path, query parameters, and the
 user's API key to make a GET call to the ATTOM API (borrowed from httr
 vignette).
 }
+\details{
+List of available endpoints:
+\itemize{
+\item 'id': (\verb{/property/id}) returns list of properties that fit criteria (bedrooms, geoid)
+\item 'basic': (\verb{/property/basicprofile}) returns basic property info, most recent sale and taxes
+\item 'detail': (\verb{/property/detail}) property characteristics, given address; or property details, given attomid
+\item 'snapshot': (\verb{/property/snapshot}) return properties that fall within radius of lat/long
+\item 'address\verb{: (}/property/address`) return properties that dall within radius of address or postalcode
+\item 'address': (\verb{/sale/snapshot}) return sales within radius of property
+}
+}
