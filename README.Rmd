@@ -71,4 +71,4 @@ List of available endpoints:
 - 'detail': (`/property/detail`) property characteristics, given address; or property details, given attomid
 - 'snapshot': (`/property/snapshot`) return properties that fall within radius of lat/long
 - 'address': (`/property/address`) return properties that dall within radius of address or postalcode
-- 'address': (`/sale/snapshot`) return sales within radius of property
+- 'sales': (`/sale/snapshot`) return sales within radius of property

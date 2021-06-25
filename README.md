@@ -75,4 +75,4 @@ List of available endpoints:
     within radius of lat/long
   - ‘address’: (`/property/address`) return properties that dall within
     radius of address or postalcode
-  - ‘address’: (`/sale/snapshot`) return sales within radius of property
+  - ‘sales’: (`/sale/snapshot`) return sales within radius of property
