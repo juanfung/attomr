@@ -105,7 +105,7 @@ attom_api = function(path, query, apikey) {
     if (httr::http_type(resp) != attomr.env$accept) {
         warning("API did not return json", call. = FALSE)
     }
-    parsed = jsonlite::fromJSON(httr::content(resp, 'text'))
+    parsed = jsonlite::fromJSON(httr::content(resp, 'text'), simplifyVector=FALSE)
     ## Print error message
     if (httr::http_error(resp)) {
         warning(
