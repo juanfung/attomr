@@ -51,10 +51,9 @@ response = attom_api(path, query, apikey)
 
 ## you can more easily iterate through a list of addresses:
 testlist = list(
-    list(address='468 SEQUOIA DR, SMYRNA, DE'),
     ## Throws an error but does not stop
-    list(address='741 EVERGREEN TERRACE, SPRINGFIELD')
-    ## list(address='4529 Winona Court, Denver, CO')
+    list(address='741 EVERGREEN TERRACE, SPRINGFIELD'),
+    list(address='4529 Winona Court, Denver, CO')
 )
 
 testout = search_list(queries=testlist, apikey=apikey, s='basic')

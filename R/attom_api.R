@@ -154,7 +154,6 @@ print.attom_api = function(x, ...) {
 #'
 #' @return path Full endpoint path (endpoint/service)
 #'
-
 #' @export
 build_path = function(s) {
     if (s %in% names(attomr.env$endpoint_list)) {
@@ -229,6 +228,31 @@ update_query = function(query, update) {
     return(query)
 }
 
+#' Error handling for queries
+#'
+#' @param ... Other named query parameters (passed to attom_api())
+#' 
+#' @return result Result of query with error handling
+try_query = function(...) {
+    args = list(...)
+    result = tryCatch({attom_api(...)},
+                   error=function(cond) {
+                       message(paste0('Query ', args$query, ' failed:'))
+                       message(cond)
+                       message('\n')
+                       return(NA)
+                   },
+                   warning=function(cond) {
+                       message(paste0('Query ', args$query, ' produced a warning:'))
+                       message(cond)
+                       message('\n')
+                       return(NULL)
+                   }
+                   )
+    return(result)
+}
+
+
 #' Function to iterate through list of queries (list of addresses)
 #'
 #' Given a list of queries, iteratively call attom_api() by building
@@ -255,7 +279,7 @@ search_list = function(queries, apikey, s, ...) {
     query = build_query(s, ...)
     for (i in 1:length(queries)) {
         query = update_query(query, queries[[i]])
-        responses[[i]] = attom_api(path, query, apikey)
+        responses[[i]] = try_query(path=path, query=query, apikey=apikey)
         Sys.sleep(5)
     }
     return(responses)
