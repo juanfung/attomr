@@ -280,15 +280,29 @@ search_list = function(queries, apikey, s, ...) {
     for (i in 1:length(queries)) {
         query = update_query(query, queries[[i]])
         responses[[i]] = try_query(path=path, query=query, apikey=apikey)
-        Sys.sleep(5)
+        Sys.sleep(1.5)
     }
     return(responses)
+}
+
+#' Function to post-process responses for basic query
+#'
+#' @param resp A single response from try_query()
+#' @param el Element from response to post-process
+#'
+#' @return d A data frame of parsed property characteristics
+#'
+#' @export
+parse_basic = function(resp, el='property') {
+    d = as.data.frame(as.list(unlist(resp[['parsed']][[el]])))
+    return(d)
 }
 
 #' Function to post-process list of responses
 #'
 #' Given a list of responses, extract the response data.frame that
-#' contains the property information (coerced to tibble)
+#' contains the property information (NB: for now, only parses responses
+#' from the basic query).
 #'
 #' @param resps List of responses (e.g., from search_list())
 #'
@@ -297,13 +311,15 @@ search_list = function(queries, apikey, s, ...) {
 #' @export
 parse_list = function(resps) {
     ## [TODO] add query ID
+    ## [TODO] extend to handle other query types
     ## iterate through list of resps
     parsed_list = list()
     for (i in 1:length(resps)) {
+        r = resps[[i]]
         ## append (table of) responses to list
-        if (!httr::http_error(resps[[i]][['resp']])) {
+        if (!is.null(r[['resp']])) {
             ## skip responses with errors, since nothing to append
-            parsed_list[[i]] = tibble::as_tibble(resps[[i]][['parsed']][['property']])
+            parsed_list[[i]] = parse_basic(r)
         }
     }
     return(parsed_list)

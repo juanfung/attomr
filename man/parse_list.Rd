@@ -14,5 +14,6 @@ parsed_list List of tibbles with response property data
 }
 \description{
 Given a list of responses, extract the response data.frame that
-contains the property information (coerced to tibble)
+contains the property information (NB: for now, only parses responses
+from the basic query).
 }
