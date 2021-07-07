@@ -294,9 +294,29 @@ search_list = function(queries, apikey, s, ...) {
 #'
 #' @export
 parse_basic = function(resp, el='property') {
+    ## [TODO] Verify works for any query that returns info for that property (eg, detail)
     d = as.data.frame(as.list(unlist(resp[['parsed']][[el]])))
     return(d)
 }
+
+#' Function to post-process responses for sales query
+#' 
+#' @param resp A single response from try_query()
+#' @param el Element from response to post-process
+#'
+#' @return out A data frame of parsed properties associated with query
+#'
+#' @export
+parse_sales = function(resp, el='property') {
+    ## [TODO] Verify works for any query that returns list of properties (eg, address)
+    out = list()
+    for (i in 1:length(resp)) {
+        out[[i]] = as.data.frame(as.list(unlist(resp[[i]][['parsed']][[el]])))
+    }
+    out = dplyr::bind_rows(out)
+    return(out)
+}
+
 
 #' Function to post-process list of responses
 #'
@@ -306,7 +326,7 @@ parse_basic = function(resp, el='property') {
 #'
 #' @param resps List of responses (e.g., from search_list())
 #'
-#' @return parsed_list List of tibbles with response property data
+#' @return parsed_list List of data frames with response property data
 #'
 #' @export
 parse_list = function(resps, el='property') {

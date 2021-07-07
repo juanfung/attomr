@@ -4,13 +4,13 @@
 \alias{parse_list}
 \title{Function to post-process list of responses}
 \usage{
-parse_list(resps)
+parse_list(resps, el = "property")
 }
 \arguments{
 \item{resps}{List of responses (e.g., from search_list())}
 }
 \value{
-parsed_list List of tibbles with response property data
+parsed_list List of data frames with response property data
 }
 \description{
 Given a list of responses, extract the response data.frame that
