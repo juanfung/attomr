@@ -105,7 +105,7 @@ attom_api = function(path, query, apikey) {
     if (httr::http_type(resp) != attomr.env$accept) {
         warning("API did not return json", call. = FALSE)
     }
-    parsed = jsonlite::fromJSON(httr::content(resp, 'text'), simplifyVector=FALSE)
+    parsed = jsonlite::fromJSON(httr::content(resp, 'text', encoding='UTF-8'), simplifyVector=FALSE)
     ## Print error message
     if (httr::http_error(resp)) {
         warning(
@@ -187,13 +187,13 @@ build_query = function(s, ...) {
     if (s %in% c('basic', 'detail')) {
         ## Return empty list
     } else if (s %in% c('address', 'sales')) {
-        query[['radius']] = ifelse('radius' %in% names(args), args$radius, 20)
+        query[['radius']] = ifelse('radius' %in% names(args), args$radius, '20')
         query[['propertytype']] = ifelse('propertytype' %in% names(args), args$propertytype, 'SFR')
-        query[['page']] = ifelse('page' %in% names(args), args$page, 1)
-        query[['pagesize']] = ifelse('pagesize' %in% names(args), args$pagesize, 100)
+        query[['page']] = ifelse('page' %in% names(args), args$page, '1')
+        query[['pagesize']] = ifelse('pagesize' %in% names(args), args$pagesize, '100')
         if (s == 'sales') {
-            query[['minsaleamt']] = ifelse('min' %in% names(args), args$min, 100000)
-            query[['maxsaleamt']] = ifelse('max' %in% names(args), args$max, 1000000)
+            query[['minsaleamt']] = ifelse('min' %in% names(args), args$min, '100000')
+            query[['maxsaleamt']] = ifelse('max' %in% names(args), args$max, '1000000')
         }
     } else {
         warning('Missing or invalid query parameters.', call.=FALSE)
