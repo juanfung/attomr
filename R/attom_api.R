@@ -309,7 +309,7 @@ parse_basic = function(resp, el='property') {
 #' @return parsed_list List of tibbles with response property data
 #'
 #' @export
-parse_list = function(resps) {
+parse_list = function(resps, el='property') {
     ## [TODO] add query ID
     ## [TODO] extend to handle other query types
     ## iterate through list of resps
@@ -319,7 +319,7 @@ parse_list = function(resps) {
         ## append (table of) responses to list
         if (!is.null(r[['resp']])) {
             ## skip responses with errors, since nothing to append
-            parsed_list[[i]] = parse_basic(r)
+            parsed_list[[i]] = parse_basic(r, el=el)
         }
     }
     return(parsed_list)
